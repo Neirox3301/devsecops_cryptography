@@ -17,7 +17,6 @@ def broadcast(message, sender_socket=None):
                 del clients[client_socket]
 
 def handle_client(client_socket):
-    """Gère un client spécifique"""
     try:
         # demande le psuedo du client
         client_socket.send("Choisissez un pseudo: ".encode('utf-8'))

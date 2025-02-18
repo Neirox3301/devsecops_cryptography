@@ -4,12 +4,13 @@ import threading
 HOST = "127.0.0.1"
 PORT = 5555
 
+CESAR_SHIFT = 1
+
 def receive_messages(client_socket):
-    """Reçoit les messages du serveur en continu"""
     while True:
         try:
             message = client_socket.recv(1024).decode('utf-8')
-            print(message)
+            print(cesar_encryption(message, -CESAR_SHIFT))
         except:
             print("Déconnecté du serveur.")
             client_socket.close()
@@ -34,12 +35,31 @@ def start_client():
     receive_thread.start()
 
     while True:
-        message = input("")
+        message = input("Vous: ")
         if message.lower() == "quit":
             client_socket.send(message.encode('utf-8'))
             client_socket.close()
             break
-        client_socket.send(message.encode('utf-8'))
+        
+        client_socket.send((cesar_encryption(message, CESAR_SHIFT)).encode('utf-8'))
+
+def cesar_encryption(message, shift):
+    alphabet = "abcdefghijklmnopqrstuvwxyz"
+    encrypted_message = ""
+
+    for letter in message:
+        if letter.lower() in alphabet:
+            new_index = (alphabet.index(letter.lower()) + shift) % 26
+            new_letter = alphabet[new_index]
+
+            if letter.isupper():
+                new_letter = new_letter.upper()
+            
+            encrypted_message += new_letter
+        else:
+            encrypted_message += letter
+
+    return encrypted_message
 
 if __name__ == "__main__":
     start_client()
