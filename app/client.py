@@ -1,39 +1,45 @@
 import socket
 import threading
 
-SERVER_IP = '127.0.0.1'  # Adresse du serveur (met l'IP publique si distant)
-PORT = 12345             # Doit être le même que le serveur
+HOST = "127.0.0.1"
+PORT = 5555
 
 def receive_messages(client_socket):
-    """Reçoit et affiche les messages des autres clients"""
+    """Reçoit les messages du serveur en continu"""
     while True:
         try:
-            message = client_socket.recv(1024)
-            if not message:
-                break
-            print(message.decode())
+            message = client_socket.recv(1024).decode('utf-8')
+            print(message)
         except:
+            print("Déconnecté du serveur.")
+            client_socket.close()
             break
 
-    client_socket.close()
-
 def start_client():
-    """Démarre un client"""
+    # Démarrer un nouveau client et le connecter au serveur
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client_socket.connect((SERVER_IP, PORT))
+    client_socket.connect((HOST, PORT))
 
-    print("Connecté au serveur ! Vous pouvez envoyer des messages.")
+    # Attend que le serveur demande un pseudo
+    prompt = client_socket.recv(1024).decode('utf-8')
+    print(prompt, end="")
 
-    thread = threading.Thread(target=receive_messages, args=(client_socket,))
-    thread.start()
+    # Le client entre son usernam
+    username = input("")
+    client_socket.send(username.encode('utf-8'))
+
+    print("Connecté au chat ! Tapez 'quit' pour quitter.")
+
+    receive_thread = threading.Thread(target=receive_messages, args=(client_socket,))
+    receive_thread.start()
 
     while True:
         message = input("")
         if message.lower() == "quit":
+            client_socket.send(message.encode('utf-8'))
+            client_socket.close()
             break
-        client_socket.send(message.encode())
-
-    client_socket.close()
+        client_socket.send(message.encode('utf-8'))
 
 if __name__ == "__main__":
     start_client()

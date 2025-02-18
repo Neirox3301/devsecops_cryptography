@@ -1,38 +1,52 @@
 import socket
 import threading
 
-HOST = '0.0.0.0'  # Accepte toutes les connexions
-PORT = 12345      # Port d'écoute du serveur
+# Configuration du serveur
+HOST = '127.0.0.1'  # Accepte les connexions sur toutes les interfaces
+PORT = 5555
 
-clients = []
+clients = {}  # Stocke les clients sous la forme {socket: username}
 
-def broadcast(message, sender_socket):
-    """Envoie un message à tous les clients sauf l'émetteur"""
-    for client in clients:
-        if client != sender_socket:
+def broadcast(message, sender_socket=None):
+    """Envoie un message à tous les clients connectés sauf l'expéditeur"""
+    for client_socket in clients:
+        if client_socket != sender_socket:
             try:
-                client.send(message)
+                client_socket.send(message.encode('utf-8'))
             except:
-                clients.remove(client)
+                client_socket.close()
+                del clients[client_socket]
 
 def handle_client(client_socket):
-    """Gère les messages reçus d'un client"""
-    while True:
-        try:
-            message = client_socket.recv(1024)
-            if not message:
-                break
-            print(f"Message reçu: {message.decode()}")
-            broadcast(message, client_socket)
-        except:
-            break
+    """Gère un client spécifique"""
+    try:
+        # Demande le psuedo du client
+        client_socket.send("Choisissez un pseudo: ".encode('utf-8'))
+        username = client_socket.recv(1024).decode('utf-8')
+        clients[client_socket] = username
 
-    client_socket.close()
-    clients.remove(client_socket)
-    print("Un client s'est déconnecté")
+        # Message dans le chat pour dire qu'il y a un nouveau client
+        broadcast(f"{username} a rejoint le chat !")
+        print(f"[NOUVEAU CLIENT] {username} s'est connecté.")
+
+        while True:
+            message = client_socket.recv(1024).decode('utf-8')
+            if message.lower() == "quit":
+                break  # L'utilisateur se déconnecte
+            
+            broadcast(f"{username}: {message}", client_socket)
+            print(f"[MESSAGE] {username}: {message}")
+
+    except ConnectionResetError:
+        pass
+    finally:
+        print(f"[DÉCONNEXION] {clients[client_socket]} s'est déconnecté.")
+        broadcast(f"{clients[client_socket]} a quitté le chat.")
+        del clients[client_socket]
+        client_socket.close()
 
 def start_server():
-    """Lance le serveur"""
+    """Démarre le serveur et écoute les nouvelles connexions"""
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind((HOST, PORT))
     server_socket.listen()
@@ -41,11 +55,9 @@ def start_server():
 
     while True:
         client_socket, addr = server_socket.accept()
-        print(f"Nouvelle connexion : {addr}")
-        clients.append(client_socket)
+        print(f"Nouvelle connexion depuis {addr}")
 
-        thread = threading.Thread(target=handle_client, args=(client_socket,))
-        thread.start()
+        threading.Thread(target=handle_client, args=(client_socket,)).start()
 
 if __name__ == "__main__":
     start_server()
