@@ -16,15 +16,15 @@ def receive_messages(client_socket):
             break
 
 def start_client():
-    # Démarrer un nouveau client et le connecter au serveur
+    # démarrer un nouveau client et le connecter au serveur
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client_socket.connect((HOST, PORT))
 
-    # Attend que le serveur demande un pseudo
+    # attend que le serveur demande un pseudo
     prompt = client_socket.recv(1024).decode('utf-8')
     print(prompt, end="")
 
-    # Le client entre son usernam
+    # le client entre son usernam
     username = input("")
     client_socket.send(username.encode('utf-8'))
 

@@ -1,11 +1,10 @@
 import socket
 import threading
 
-# Configuration du serveur
-HOST = '127.0.0.1'  # Accepte les connexions sur toutes les interfaces
+HOST = '127.0.0.1'
 PORT = 5555
 
-clients = {}  # Stocke les clients sous la forme {socket: username}
+clients = {}  # dictionnaire {socket: username}
 
 def broadcast(message, sender_socket=None):
     """Envoie un message à tous les clients connectés sauf l'expéditeur"""
@@ -20,19 +19,19 @@ def broadcast(message, sender_socket=None):
 def handle_client(client_socket):
     """Gère un client spécifique"""
     try:
-        # Demande le psuedo du client
+        # demande le psuedo du client
         client_socket.send("Choisissez un pseudo: ".encode('utf-8'))
         username = client_socket.recv(1024).decode('utf-8')
         clients[client_socket] = username
 
-        # Message dans le chat pour dire qu'il y a un nouveau client
+        # message dans le chat pour dire qu'il y a un nouveau client
         broadcast(f"{username} a rejoint le chat !")
         print(f"[NOUVEAU CLIENT] {username} s'est connecté.")
 
         while True:
             message = client_socket.recv(1024).decode('utf-8')
             if message.lower() == "quit":
-                break  # L'utilisateur se déconnecte
+                break  # l'utilisateur se déconnecte
             
             broadcast(f"{username}: {message}", client_socket)
             print(f"[MESSAGE] {username}: {message}")
