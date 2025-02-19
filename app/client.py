@@ -7,13 +7,19 @@ import tkinter as tk
 # paramètres
 HOST = "127.0.0.1"
 PORT = 5555
-CESAR_SHIFT = 1
 ALPHABET = "abcdefghijklmnopqrstuvwxyz1234567890,?;./!§ù%^é¨'$£¤&(-è_çà)=~#[|`^@]*-+"
 FIRST_MESSAGE = True
 
+# différentes clé des chiffrement
+CODE_METHOD = "vigenere"
+
+# cesar
+CESAR_SHIFT = 1
+# vigenere
+VIGENERE_KEY = "SECURITE"
+
 # visuel de l'application
 class ChatClient(tk.Tk):
-
     # différents éléments visuels de l'application
     def __init__(self, send_callback):
         super().__init__()
@@ -56,8 +62,8 @@ class ChatClient(tk.Tk):
     # chiffre et envoyer un message
     def send_message(self, event=None):
         global FIRST_MESSAGE
-        connected_user = cesar(f"[NOUVELLE CONNEXION] {username} s'est connecté", ALPHABET, CESAR_SHIFT)
-        message = cesar((username + ": " + self.entry_message.get()), ALPHABET, CESAR_SHIFT)
+        connected_user = encryption_method(CODE_METHOD, "encrypt", f"[NOUVELLE CONNEXION] {username} s'est connecté")
+        message = encryption_method(CODE_METHOD, "encrypt", f"{username}: {self.entry_message.get()}")
 
         if message:
             # messae à la première connexion
@@ -72,7 +78,7 @@ class ChatClient(tk.Tk):
 
     # déchiffre et afficher le message
     def display_message(self, _message):
-        message = cesar(_message, ALPHABET, -CESAR_SHIFT)
+        message = encryption_method(CODE_METHOD, "decrypt", _message)
 
         self.chat_area.config(state="normal")
         self.chat_area.insert(tk.END, message + "\n")
@@ -109,7 +115,17 @@ def start_client():
 
     gui.mainloop()
 
-# fonction de chiffrement par césar (modifié pour qu'elle soit aléatoire pour plus de sécurité)
+# choisir la fonction de chiffrement
+def encryption_method(_method, _way, _message):
+    if _method == "cesar":
+        if _way == "encrypt":
+            return cesar(_message, ALPHABET, CESAR_SHIFT)
+        if _way == "decrypt":
+            return cesar(_message, ALPHABET, -CESAR_SHIFT)
+    elif _method == "vigenere":
+        return vigenere(_message, ALPHABET, VIGENERE_KEY)
+
+# fonction de chiffrement par cesar
 def cesar(_message, _alphabet, _shift):
     encrypted_message = ""
 
@@ -125,6 +141,33 @@ def cesar(_message, _alphabet, _shift):
             encrypted_message += letter
 
     return encrypted_message
+
+def vigenere(_message, _alphabet, _key, decrypt=False):
+    encrypted_message = ""
+    key = _key.lower()
+    key_length = len(key)
+
+    for i, letter in enumerate(_message):
+        if letter.lower() in _alphabet:
+            key_letter = key[i % key_length]
+            key_shift = _alphabet.index(key_letter)
+            text_index = _alphabet.index(letter.lower())
+
+            if decrypt:
+                new_index = (text_index - key_shift) % len(_alphabet)
+            else:
+                new_index = (text_index + key_shift) % len(_alphabet)
+
+            new_letter = _alphabet[new_index]
+            if letter.isupper():
+                new_letter = new_letter.upper()
+
+            encrypted_message += new_letter
+        else:
+            encrypted_message += letter
+
+    return encrypted_message
+
 
 if __name__ == "__main__":
     start_client()
