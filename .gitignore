@@ -1,1 +1,12 @@
 .venv/
+
+__pycache__/
+*.pyc
+*.pyo
+
+start_server.py
+start_client_tk.py
+
+*.log
+*.tmp
+.DS_Store
