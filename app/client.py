@@ -1,9 +1,20 @@
+from tkinter import scrolledtext
+import random
 import socket
 import threading
 import tkinter as tk
-from tkinter import scrolledtext
 
+# paramètres
+HOST = "127.0.0.1"
+PORT = 5555
+CESAR_SHIFT = 1
+ALPHABET = "abcdefghijklmnopqrstuvwxyz1234567890,?;./!§ù%^é¨'$£¤&(-è_çà)=~#[|`^@]*-+"
+FIRST_MESSAGE = True
+
+# visuel de l'application
 class ChatClient(tk.Tk):
+
+    # différents éléments visuels de l'application
     def __init__(self, send_callback):
         super().__init__()
 
@@ -31,38 +42,45 @@ class ChatClient(tk.Tk):
 
         self.send_callback = send_callback
 
+    # se connecter au serveur
     def connect_to_server(self):
-        """Cette fonction est appelée après avoir entré le pseudo"""
+        global username 
         username = self.username_entry.get()
+        
         if username:
             self.send_callback(username)
             self.username_entry.config(state="disabled")
             self.username_button.config(state="disabled")
             self.username_label.config(text=f"Connecté en tant que {username}")
-            print(f"Pseudo choisi : {username}")
 
+    # chiffre et envoyer un message
     def send_message(self, event=None):
-        message = cesar(self.entry_message.get(), CESAR_SHIFT)
+        global FIRST_MESSAGE
+        connected_user = cesar(f"[NOUVELLE CONNEXION] {username} s'est connecté", ALPHABET, CESAR_SHIFT)
+        message = cesar((username + ": " + self.entry_message.get()), ALPHABET, CESAR_SHIFT)
 
         if message:
-            self.display_message(f"Moi: {message}")
+            # messae à la première connexion
+            if FIRST_MESSAGE == True:
+                self.display_message(connected_user)
+                self.send_callback(connected_user)
+                FIRST_MESSAGE = False
+
+            self.display_message(message)
             self.send_callback(message)
             self.entry_message.delete(0, tk.END)
 
+    # déchiffre et afficher le message
     def display_message(self, _message):
-        message = cesar(_message, -CESAR_SHIFT)
+        message = cesar(_message, ALPHABET, -CESAR_SHIFT)
 
         self.chat_area.config(state="normal")
         self.chat_area.insert(tk.END, message + "\n")
         self.chat_area.config(state="disabled")
         self.chat_area.yview(tk.END)
 
-HOST = "127.0.0.1"
-PORT = 5555
-CESAR_SHIFT = 1
-
 def receive_messages(_client_socket, _gui):
-    """Reçoit les messages du serveur en continu"""
+    # recoit les messages du serveur
     while True:
         try:
             message = _client_socket.recv(1024).decode('utf-8')
@@ -91,14 +109,14 @@ def start_client():
 
     gui.mainloop()
 
-def cesar(_message, _shift):
-    alphabet = "abcdefghijklmnopqrstuvwxyz"
+# fonction de chiffrement par césar (modifié pour qu'elle soit aléatoire pour plus de sécurité)
+def cesar(_message, _alphabet, _shift):
     encrypted_message = ""
 
     for letter in _message:
-        if letter.lower() in alphabet:
-            new_index = (alphabet.index(letter.lower()) + _shift) % 26
-            new_letter = alphabet[new_index]
+        if letter.lower() in _alphabet:
+            new_index = (_alphabet.index(letter.lower()) + _shift) % len(ALPHABET)
+            new_letter = _alphabet[new_index]
 
             if letter.isupper():
                 new_letter = new_letter.upper()

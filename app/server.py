@@ -24,7 +24,6 @@ def handle_client(client_socket):
         clients[client_socket] = username
 
         # message dans le chat pour dire qu'il y a un nouveau client
-        broadcast(f"{username} a rejoint le chat !")
         print(f"[NOUVEAU CLIENT] {username} s'est connecté.")
 
         while True:
@@ -32,14 +31,12 @@ def handle_client(client_socket):
             if message.lower() == "quit":
                 break  # l'utilisateur se déconnecte
             
-            broadcast(f"{username}: {message}", client_socket)
-            print(f"[MESSAGE] {username}: {message}")
+            broadcast(message, client_socket)
 
     except ConnectionResetError:
         pass
     finally:
         print(f"[DÉCONNEXION] {clients[client_socket]} s'est déconnecté.")
-        broadcast(f"{clients[client_socket]} a quitté le chat.")
         del clients[client_socket]
         client_socket.close()
 
