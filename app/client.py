@@ -11,7 +11,7 @@ ALPHABET = "abcdefghijklmnopqrstuvwxyz1234567890,?;./!§ù%^é¨'$£¤&(-è_çà
 FIRST_MESSAGE = True
 
 # différentes clé des chiffrement
-CODE_METHOD = "vigenere"
+CODE_METHOD = "cesar"
 
 # cesar
 CESAR_SHIFT = 1
