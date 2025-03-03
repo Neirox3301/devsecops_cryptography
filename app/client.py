@@ -1,5 +1,9 @@
+from Crypto.Cipher import AES
+from Crypto.Protocol.KDF import PBKDF2
+from Crypto.Util.Padding import pad, unpad
 from tkinter import scrolledtext
-import random
+import base64
+import os
 import socket
 import threading
 import tkinter as tk
@@ -10,13 +14,19 @@ PORT = 5555
 ALPHABET = "abcdefghijklmnopqrstuvwxyz1234567890,?;./!§ù%^é¨'$£¤&(-è_çà)=~#[|`^@]*-+"
 FIRST_MESSAGE = True
 
-# différentes clé des chiffrement
-CODE_METHOD = "cesar"
+# choisir la clé des chiffrement
+CODE_METHOD = "aes"
 
-# cesar
+# CESAR
 CESAR_SHIFT = 1
-# vigenere
+
+# VIGENERE
 VIGENERE_KEY = "SECURITE"
+
+# AES
+def generate_aes_key_from_password(password, salt=b"MonSelUnique"):
+    return PBKDF2(password, salt, dkLen=32)
+AES_KEY = generate_aes_key_from_password("MotDePasseUltraSecret")
 
 # visuel de l'application
 class ChatClient(tk.Tk):
@@ -123,7 +133,12 @@ def encryption_method(_method, _way, _message):
         if _way == "decrypt":
             return cesar(_message, ALPHABET, -CESAR_SHIFT)
     elif _method == "vigenere":
-        return vigenere(_message, ALPHABET, VIGENERE_KEY)
+        return vigenere(_message, ALPHABET, VIGENERE_KEY, decrypt=(_way == "decrypt"))
+    elif _method == "aes":
+        if _way == "encrypt":
+            return encrypt_aes(_message, AES_KEY)
+        if _way == "decrypt":
+            return decrypt_aes(_message, AES_KEY)
 
 # fonction de chiffrement par cesar
 def cesar(_message, _alphabet, _shift):
@@ -142,6 +157,7 @@ def cesar(_message, _alphabet, _shift):
 
     return encrypted_message
 
+# fonction de chiffrement par vigenere
 def vigenere(_message, _alphabet, _key, decrypt=False):
     encrypted_message = ""
     key = _key.lower()
@@ -168,6 +184,23 @@ def vigenere(_message, _alphabet, _key, decrypt=False):
 
     return encrypted_message
 
+# fonction de chiffrement par AES
+def encrypt_aes(_message, _key):
+    iv = os.urandom(16)
+    cipher = AES.new(_key, AES.MODE_CBC, iv)
+
+    ciphertext = cipher.encrypt(pad(_message.encode(), AES.block_size))
+    return base64.b64encode(iv + ciphertext).decode()
+
+# fonction de déchiffrement par AES
+def decrypt_aes(_message, _key):
+    encrypted_bytes = base64.b64decode(_message)
+    iv = encrypted_bytes[:16]
+    ciphertext = encrypted_bytes[16:]
+
+    cipher = AES.new(_key, AES.MODE_CBC, iv)
+    plaintext = unpad(cipher.decrypt(ciphertext), AES.block_size)
+    return plaintext.decode()
 
 if __name__ == "__main__":
     start_client()
