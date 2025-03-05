@@ -5,7 +5,7 @@ def xor(_string, _key):
     rawBytes2 = binascii.unhexlify(_key)
 
     if len(rawBytes1) != len(rawBytes2):
-        raise ValueError("Les deux entrées doivent avoir la même longueur")
+        raise ValueError("le texte et la clef doivent avoir la meme longueur")
 
     xor_result = bytes(a ^ b for a, b in zip(rawBytes1, rawBytes2))
     return binascii.hexlify(xor_result).decode()
