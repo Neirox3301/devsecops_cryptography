@@ -24,7 +24,7 @@ CESAR_SHIFT = 1
 VIGENERE_KEY = "SECURITE"
 
 # AES
-def generate_aes_key_from_password(password, salt=b"MonSelUnique"):
+def generate_aes_key_from_password(password, salt=b"SelUnique"):
     return PBKDF2(password, salt, dkLen=32)
 AES_KEY = generate_aes_key_from_password("MotDePasseUltraSecret")
 
