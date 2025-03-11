@@ -12,6 +12,7 @@ def generate_aes_key():
 
     with open("aes_key.bin", "wb") as f:
         f.write(aes_key)
+
 generate_aes_key()
 
 def broadcast(message, sender_socket=None):

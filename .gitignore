@@ -12,3 +12,4 @@ start_client.py
 .DS_Store
 
 *.enc
+*.bin
