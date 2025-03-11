@@ -10,3 +10,5 @@ start_client.py
 *.log
 *.tmp
 .DS_Store
+
+*.enc

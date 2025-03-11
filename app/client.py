@@ -24,9 +24,15 @@ CESAR_SHIFT = 1
 VIGENERE_KEY = "SECURITE"
 
 # AES
-def generate_aes_key_from_password(password, salt=b"SelUnique"):
-    return PBKDF2(password, salt, dkLen=32)
-AES_KEY = generate_aes_key_from_password("MotDePasseUltraSecret")
+def load_aes_key():    
+    if not os.path.exists("aes_key.bin"):
+        raise FileNotFoundError("fichier 'aes_key.bin' introuvable")
+
+    with open("aes_key.bin", "rb") as f:
+        aes_key = f.read()
+    return aes_key
+
+AES_KEY = load_aes_key()
 
 # visuel de l'application
 class ChatClient(tk.Tk):

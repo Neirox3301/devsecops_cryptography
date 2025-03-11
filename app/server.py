@@ -1,10 +1,18 @@
 import socket
 import threading
+import os
 
 HOST = '127.0.0.1'
 PORT = 5555
 
 clients = {}  # dictionnaire {socket: username}
+
+def generate_aes_key():
+    aes_key = os.urandom(32)
+
+    with open("aes_key.bin", "wb") as f:
+        f.write(aes_key)
+generate_aes_key()
 
 def broadcast(message, sender_socket=None):
     """Envoie un message à tous les clients connectés sauf l'expéditeur"""
