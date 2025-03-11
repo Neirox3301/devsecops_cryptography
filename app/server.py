@@ -7,6 +7,7 @@ PORT = 5555
 
 clients = {}  # dictionnaire {socket: username}
 
+# générer la clé AES
 def generate_aes_key():
     aes_key = os.urandom(32)
 
@@ -15,8 +16,8 @@ def generate_aes_key():
 
 generate_aes_key()
 
+#envoyer un message à tous les utilisateurs connectés
 def broadcast(message, sender_socket=None):
-    """Envoie un message à tous les clients connectés sauf l'expéditeur"""
     for client_socket in clients:
         if client_socket != sender_socket:
             try:
@@ -25,6 +26,7 @@ def broadcast(message, sender_socket=None):
                 client_socket.close()
                 del clients[client_socket]
 
+# traiter les requetes des utilisateurs
 def handle_client(client_socket):
     try:
         # demande le psuedo du client
@@ -49,8 +51,8 @@ def handle_client(client_socket):
         del clients[client_socket]
         client_socket.close()
 
+# démarrer le serveur et attendre des nouvelles connexions
 def start_server():
-    """Démarre le serveur et écoute les nouvelles connexions"""
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind((HOST, PORT))
     server_socket.listen()

@@ -14,7 +14,7 @@ PORT = 5555
 ALPHABET = "abcdefghijklmnopqrstuvwxyz1234567890,?;./!§ù%^é¨'$£¤&(-è_çà)=~#[|`^@]*-+"
 FIRST_MESSAGE = True
 
-# choisir la clé des chiffrement
+# choisir la méthode des chiffrement
 CODE_METHOD = "aes"
 
 # CESAR
@@ -82,7 +82,7 @@ class ChatClient(tk.Tk):
         message = encryption_method(CODE_METHOD, "encrypt", f"{username}: {self.entry_message.get()}")
 
         if message:
-            # messae à la première connexion
+            # message à la première connexion
             if FIRST_MESSAGE == True:
                 self.display_message(connected_user)
                 self.send_callback(connected_user)
@@ -92,7 +92,7 @@ class ChatClient(tk.Tk):
             self.send_callback(message)
             self.entry_message.delete(0, tk.END)
 
-    # déchiffre et afficher le message
+    # déchiffrer et afficher le message
     def display_message(self, _message):
         message = encryption_method(CODE_METHOD, "decrypt", _message)
 
