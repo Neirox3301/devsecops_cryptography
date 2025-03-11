@@ -13,3 +13,4 @@ start_client.py
 
 *.enc
 *.bin
+*.pem
