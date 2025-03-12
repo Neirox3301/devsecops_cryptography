@@ -40,8 +40,11 @@ class ChatClient(tk.Tk):
     def __init__(self, send_callback):
         super().__init__()
 
-        self.geometry("400x500")
+        self.geometry("400x600")
         self.configure(bg="#f0f0f0")
+
+        self.selected_method = tk.StringVar(value="AES")
+        global CODE_METHOD
 
         self.chat_area = scrolledtext.ScrolledText(self, wrap=tk.WORD, state="disabled", height=15)
         self.chat_area.pack(padx=10, pady=10, fill="both", expand=True)
@@ -53,6 +56,26 @@ class ChatClient(tk.Tk):
         self.send_button = tk.Button(self, text="Envoyer", font=("Arial", 12), command=self.send_message)
         self.send_button.pack(pady=5)
 
+        self.method_frame = tk.Frame(self)
+        self.method_frame.pack(pady=5)
+
+        self.method_frame = tk.Frame(self)
+        self.method_frame.pack(pady=5)
+
+        # différentes méthodes
+        self.cesar_button = tk.Button(self.method_frame, text="César", font=("Arial", 10), command=lambda: self.set_encryption_method("César", "cesar"))
+        self.cesar_button.pack(side=tk.LEFT, padx=5)
+
+        self.vigenere_button = tk.Button(self.method_frame, text="Vigenère", font=("Arial", 10), command=lambda: self.set_encryption_method("Vigenère", "vigenere"))
+        self.vigenere_button.pack(side=tk.LEFT, padx=5)
+
+        self.aes_button = tk.Button(self.method_frame, text="AES", font=("Arial", 10), command=lambda: self.set_encryption_method("AES", "aes"))
+        self.aes_button.pack(side=tk.LEFT, padx=5)
+
+        # Méthode choisie
+        self.method_label = tk.Label(self, text="Méthode de Chiffrement : AES", font=("Arial", 12), fg="blue")
+        self.method_label.pack(pady=5)
+
         self.username_label = tk.Label(self, text="Choisissez un pseudo :", font=("Arial", 12))
         self.username_label.pack(pady=10)
 
@@ -63,6 +86,13 @@ class ChatClient(tk.Tk):
         self.username_button.pack(pady=10)
 
         self.send_callback = send_callback
+    
+    # changer la méthode de chiffrement
+    def set_encryption_method(self, display_name, method_name):
+        global CODE_METHOD
+        CODE_METHOD = method_name
+        self.selected_method.set(display_name)
+        self.method_label.config(text=f"Chiffrement : {display_name}")
 
     # se connecter au serveur
     def connect_to_server(self):

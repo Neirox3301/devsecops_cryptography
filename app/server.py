@@ -6,7 +6,6 @@ HOST = '127.0.0.1'
 PORT = 5555
 
 clients = {}  # dictionnaire {socket: username}
-
 # générer la clé AES
 def generate_aes_key():
     aes_key = os.urandom(32)
